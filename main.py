@@ -1,7 +1,6 @@
 import turtle
 import tkinter as tk
 from PIL import Image, ImageTk
-import turtle
 
 class Paddle:
     def __init__(self, selection, screen):
@@ -13,9 +12,9 @@ class Paddle:
         self.paddle.showturtle()
 
     def left(self):
-        self.paddle.bk(20)
+        self.paddle.bk(25)
     def right(self):
-        self.paddle.fd(20)
+        self.paddle.fd(25)
 
 
 class Game:
