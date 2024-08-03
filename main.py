@@ -16,7 +16,6 @@ class Brick():
 
     def generate(self, x, y):
         self.brick.goto(x,y)
-        # borders
 
 class Bricks:
     def __init__(self, selection, screen, color):
@@ -26,7 +25,7 @@ class Bricks:
 
     def brick_generation(self, selection, screen, color):
         if selection == 1:
-            rows = 6
+            rows = 8
             cols = 7
             for row in range(rows):
                 for col in range(cols):
@@ -35,6 +34,34 @@ class Bricks:
                     brick = Brick(screen, color)
                     self.bricks.append(brick)
                     brick.brick.goto(x,y)
+        elif selection == 2:
+            row1 = ["x", "x", "x", "x", "x", "x", "x", ]
+            row2 = ["x", "", "", "", "", "", "x",]
+            for row in range(1,10):
+                if row % 2 != 0:
+                    col = 0
+                    for mark in row1:
+                        if mark == "x":
+                            x = -300 + col * 100
+                            y = 300 - row * 30
+                            brick = Brick(screen, color)
+                            self.bricks.append(brick)
+                            brick.brick.goto(x, y)
+                            col += 1
+                        else:
+                            col += 1
+                else:
+                    col = 0
+                    for mark in row2:
+                        if mark == "x":
+                            x = -300 + col * 100
+                            y = 300 - row * 30
+                            brick = Brick(screen, color)
+                            self.bricks.append(brick)
+                            brick.brick.goto(x, y)
+                            col += 1
+                        else:
+                            col += 1
 
 
 
