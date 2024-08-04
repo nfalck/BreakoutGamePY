@@ -2,6 +2,7 @@ import turtle
 import tkinter as tk
 from PIL import Image, ImageTk
 import random
+import time
 
 class Brick():
     def __init__(self, screen, color):
@@ -100,34 +101,28 @@ class Ball:
             self.ball_y_move *= -1
 
     def collision_with_paddle(self, paddle):
-        if (self.ball.distance(paddle.paddle) < 100 / 2 + 10 and
-                self.ball.ycor() > paddle.paddle.ycor() and
-                self.ball.ycor() < paddle.paddle.ycor() + 10):
-            self.ball_y_move *= -1
+        if self.ball.ycor() < -375:
+            self.ball.hideturtle()
+            self.ball.goto(0,-50)
+            self.ball.showturtle()
+        elif self.ball.ycor() < -355:
+            if self.ball.xcor() <= paddle.paddle.xcor() + 50 and self.ball.xcor() >= paddle.paddle.xcor() - 50:
+                self.ball_y_move *= -1
 
     def collision_with_bricks(self, bricks):
         for brick in bricks.bricks:
-            if self.ball.distance(brick.brick) < 40:
-                brick.brick.clear()
-                brick.brick.hideturtle()
-                bricks.bricks.remove(brick)
-
-                # detect collision from left
-            if self.ball.xcor() < brick.brick_left:
-                self.ball_x_move *= -1
-
-                # detect collision from right
-            elif self.ball.xcor() > brick.brick_right:
-                self.ball_x_move *= -1
-
-                # detect collision from bottom
-            elif self.ball.ycor() > brick.brick_bottom:
-                self.ball_y_move *= -1
-
-                # detect collision from top
-            elif self.ball.ycor() > brick.brick_top:
-                self.ball_y_move *= -1
-
+            if self.ball.distance(brick.brick) < 50:
+                if (self.ball.xcor() < brick.brick.xcor() + 50 and self.ball.xcor() > brick.brick.xcor() - 50):
+                    if self.ball.ycor() < brick.brick.ycor() - 16:
+                        self.ball_y_move *= -1
+                    elif (self.ball.ycor() < brick.brick.ycor()-16 and self.ball.ycor() > brick.brick.ycor()+16):
+                        self.ball_x_move *= -1
+                    elif self.ball.ycor() > brick.brick.ycor() + 16:
+                        self.ball_y_move *= -1
+                    brick.brick.clear()
+                    brick.brick.hideturtle()
+                    bricks.bricks.remove(brick)
+                    time.sleep(0.01)
 
 
 class Paddle:
@@ -188,6 +183,7 @@ class Game:
 
     def game_start(self):
         while game_playing:
+            time.sleep(1 / 60)
             self.screen.onkey(self.game_paddle.left, "Left")
             self.screen.onkey(self.game_paddle.right, "Right")
             self.game_ball.move()
