@@ -184,10 +184,10 @@ class Paddle:
 
     def left(self):
         if self.paddle.xcor() > -350:
-            self.paddle.bk(25)
+            self.paddle.bk(35)
     def right(self):
         if self.paddle.xcor() < 350:
-            self.paddle.fd(25)
+            self.paddle.fd(35)
 
 
 class Game:
