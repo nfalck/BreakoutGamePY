@@ -19,12 +19,16 @@ class Brick():
         self.brick.goto(x,y)
 
 class Bricks:
-    def __init__(self, selection, screen, color):
+    def __init__(self, selection, screen):
         self.bricks = []
-        self.brick_generation(selection=selection, screen=screen, color=color)
+        self.brick_generation(selection=selection, screen=screen)
 
+    def color_pick(self):
+        color_index = random.randint(1,8)
+        brick_image = fr"assets/brick_{color_index}.gif"
+        return brick_image
 
-    def brick_generation(self, selection, screen, color):
+    def brick_generation(self, selection, screen):
         if selection == 1:
             rows = 8
             cols = 7
@@ -32,11 +36,12 @@ class Bricks:
                 for col in range(cols):
                     x = -300 + col * 100
                     y = 300 - row * 30
+                    color = self.color_pick()
                     brick = Brick(screen, color)
                     self.bricks.append(brick)
                     brick.brick.goto(x,y)
         elif selection == 2:
-            row1 = ["x", "x", "x", "x", "x", "x", "x", ]
+            row1 = ["x", "x", "x", "x", "x", "x", "x"]
             row2 = ["x", "", "", "", "", "", "x",]
             for row in range(1,10):
                 if row % 2 != 0:
@@ -45,6 +50,7 @@ class Bricks:
                         if mark == "x":
                             x = -300 + col * 100
                             y = 300 - row * 30
+                            color = self.color_pick()
                             brick = Brick(screen, color)
                             self.bricks.append(brick)
                             brick.brick.goto(x, y)
@@ -57,12 +63,45 @@ class Bricks:
                         if mark == "x":
                             x = -300 + col * 100
                             y = 300 - row * 30
+                            color = self.color_pick()
                             brick = Brick(screen, color)
                             self.bricks.append(brick)
                             brick.brick.goto(x, y)
                             col += 1
                         else:
                             col += 1
+        elif selection == 3:
+            row1 = ["x", "x", "", "x", "x", "", "x"]
+            space = ["", "", "", "", "", "", ""]
+            for row in range(1,7):
+                col = 0
+                for mark in row1:
+                    if mark == "x":
+                        x = -300 + col * 100
+                        y = 300 - row * 30
+                        color = self.color_pick()
+                        brick = Brick(screen, color)
+                        self.bricks.append(brick)
+                        brick.brick.goto(x, y)
+                        col += 1
+                    else:
+                        col += 1
+
+            for row in range(1,5):
+                col = 0
+                for mark in row1:
+                    if mark == "x":
+                        x = -300 + col * 100
+                        y = 69 - row * 30
+                        color = self.color_pick()
+                        brick = Brick(screen, color)
+                        self.bricks.append(brick)
+                        brick.brick.goto(x, y)
+                        col += 1
+                    else:
+                        col += 1
+
+
 
 
 
@@ -173,13 +212,16 @@ class Game:
             self.screen.update()
         self.game_paddle = Paddle(selection=self.selection, screen=self.screen)
         self.game_ball = Ball(selection=self.selection, screen=self.screen)
-        self.brick_color = r"assets/brick_1.gif"
-        self.screen.register_shape(self.brick_color)
-        self.game_bricks = Bricks(selection=self.selection, screen=self.screen, color=self.brick_color)
+        self.brick_color_initialization()
+        self.game_bricks = Bricks(selection=self.selection, screen=self.screen)
         self.screen.listen()
         self.screen.onkey(self.game_start, "space")
         global game_playing
         game_playing = True
+
+    def brick_color_initialization(self):
+        for index in range(1,9):
+            self.screen.register_shape(fr"assets/brick_{index}.gif")
 
     def game_start(self):
         while game_playing:
