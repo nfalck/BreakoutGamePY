@@ -4,7 +4,23 @@ from PIL import Image, ImageTk
 import random
 import time
 
-class Brick():
+class ScoreBoard:
+    def __init__(self, screen):
+        self.scoreboard = turtle.RawTurtle(screen)
+        self.scoreboard.penup()
+        self.scoreboard.hideturtle()
+        self.scoreboard.color('white')
+        self.score = 0
+        self.lives = 3
+        self.scoreboard.goto(-300, 330)
+        self.scoreboard.write(f'Score: {self.score}  Lives: {self.lives}', font=('Lexend', 15, 'normal'))
+
+    def update_score(self):
+        self.scoreboard.clear()
+        self.scoreboard.write(f'Score: {self.score}  Lives: {self.lives}', font=('Lexend', 15, 'normal'))
+
+
+class Brick:
     def __init__(self, screen, color):
         self.brick = turtle.RawTurtle(screen)
         self.brick.shape(color)
@@ -104,8 +120,6 @@ class Bricks:
 
 
 
-
-
 class Ball:
     def __init__(self, selection, screen):
         if selection == 1:
@@ -139,16 +153,18 @@ class Ball:
         elif self.ball.ycor() >= 375:
             self.ball_y_move *= -1
 
-    def collision_with_paddle(self, paddle):
+    def collision_with_paddle(self, paddle, scoreboard):
         if self.ball.ycor() < -375:
             self.ball.hideturtle()
             self.ball.goto(0,-50)
             self.ball.showturtle()
+            scoreboard.lives -= 1
+            scoreboard.update_score()
         elif self.ball.ycor() < -355:
             if self.ball.xcor() <= paddle.paddle.xcor() + 50 and self.ball.xcor() >= paddle.paddle.xcor() - 50:
                 self.ball_y_move *= -1
 
-    def collision_with_bricks(self, bricks):
+    def collision_with_bricks(self, bricks, scoreboard):
         for brick in bricks.bricks:
             if self.ball.distance(brick.brick) < 50:
                 if (self.ball.xcor() < brick.brick.xcor() + 50 and self.ball.xcor() > brick.brick.xcor() - 50):
@@ -158,6 +174,8 @@ class Ball:
                         self.ball_x_move *= -1
                     elif self.ball.ycor() > brick.brick.ycor() + 16:
                         self.ball_y_move *= -1
+                    scoreboard.score += 100
+                    scoreboard.update_score()
                     brick.brick.clear()
                     brick.brick.hideturtle()
                     bricks.bricks.remove(brick)
@@ -210,28 +228,41 @@ class Game:
             self.screen = turtle.TurtleScreen(self.canvas)
             self.screen.bgpic('assets/level3_background.png')
             self.screen.update()
+        self.scoreboard = ScoreBoard(screen=self.screen)
         self.game_paddle = Paddle(selection=self.selection, screen=self.screen)
         self.game_ball = Ball(selection=self.selection, screen=self.screen)
         self.brick_color_initialization()
         self.game_bricks = Bricks(selection=self.selection, screen=self.screen)
         self.screen.listen()
         self.screen.onkey(self.game_start, "space")
-        global game_playing
-        game_playing = True
 
     def brick_color_initialization(self):
         for index in range(1,9):
             self.screen.register_shape(fr"assets/brick_{index}.gif")
 
+    def game_over(self):
+        self.gameover_frame = tk.Frame(self.canvas, background="blue", width=200, height=200)
+        self.gameover_frame.place(x=300, y=400)
+        self.gameover_label = tk.Label(self.canvas, text="Game Over", fg="white", bg="blue")
+        self.gameover_label.place(x=350, y=450)
+        self.restart_button = tk.Button(self.canvas, text="Restart")
+        self.restart_button.place(x=325, y=500)
+        self.quit_button = tk.Button(self.canvas, text="Quit")
+        self.quit_button.place(x=425, y=500)
+
     def game_start(self):
+        game_playing = True
         while game_playing:
             time.sleep(1 / 60)
             self.screen.onkey(self.game_paddle.left, "Left")
             self.screen.onkey(self.game_paddle.right, "Right")
             self.game_ball.move()
             self.game_ball.collision_with_walls()
-            self.game_ball.collision_with_paddle(self.game_paddle)
-            self.game_ball.collision_with_bricks(bricks=self.game_bricks)
+            self.game_ball.collision_with_paddle(self.game_paddle, scoreboard = self.scoreboard)
+            self.game_ball.collision_with_bricks(bricks=self.game_bricks, scoreboard=self.scoreboard)
+            if self.scoreboard.lives == 0:
+                game_playing = False
+                self.game_over()
 
 class MainApplication:
     def __init__(self, master):
