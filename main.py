@@ -7,43 +7,76 @@ from Paddle import Paddle
 from Bricks import Bricks
 from Ball import Ball
 
+
 class MainApplication:
     def __init__(self, master):
+        # Main Menu layout
         self.master = master
         self.master.title("Breakout Game")
         self.start_button = tk.Button(self.master, text="Start Game", command=self.select_level)
         self.start_button.grid(row=0, column=1)
+
+        # Background images for every level
         self.level1_background = tk.PhotoImage(file="assets/level1_background.png")
         self.level2_background = tk.PhotoImage(file="assets/level2_background.png")
         self.level3_background = tk.PhotoImage(file="assets/level3_background.png")
-        self.level_backgrounds = [self.level1_background, self.level2_background, self.level3_background]
+
+        #  Level Selection Widgets for select_level
+        self.select_title = tk.Label(self.master, text="Select Level")  # Title
+        self.level1_image = ImageTk.PhotoImage(Image.open("assets/level1_preview.png"))  # Preview of level 1
+        self.level2_image = ImageTk.PhotoImage(Image.open("assets/level2_preview.png"))  # Preview of level 2
+        self.level3_image = ImageTk.PhotoImage(Image.open("assets/level3_preview.png"))  # Preview of level 3
+        self.var = tk.IntVar()  # Value of level selected
+        self.level1_button = self.level1_button = tk.Radiobutton(self.master, variable=self.var, value=1,
+                                                                 indicatoron=False, image=self.level1_image,
+                                                                 command=self.update_selection)
+        self.level2_button = self.level2_button = tk.Radiobutton(self.master, variable=self.var, value=2,
+                                                                 indicatoron=False, image=self.level2_image,
+                                                                 command=self.update_selection)
+        self.level3_button = self.level3_button = tk.Radiobutton(self.master, variable=self.var, value=3,
+                                                                 indicatoron=False, image=self.level3_image,
+                                                                 command=self.update_selection)
+        self.selection_label = tk.Label(self.master, text="")  # Indicates which level is selected
+        self.start_game_button = tk.Button(self.master, text="Start Game", command=self.initialize_game)
+
+        self.selection = None  # initialized in update_selection
+
+        # Game Widgets for start_game
+        self.canvas = tk.Canvas(self.master, width=800, height=800)
+        self.start_frame = tk.Frame(self.canvas, background="blue", width=200, height=200)
+        self.start_text = tk.Label(self.canvas, text="Press space to start", fg="white", bg="blue")
+
+        # Game Assets that will be initialized in start_game
+        self.screen = None # TurtleScreen
+        self.scoreboard = None
+        self.game_paddle = None
+        self.game_ball = None
+        self.game_bricks = None
+
+        # Game Win Widgets for game_win
+        self.win_frame = tk.Frame(self.canvas, background="blue", width=200, height=200)
+        self.win_label = tk.Label(self.canvas, text="You Won!", fg="white", bg="blue")
+
+        # Gameover Widgets for game_over
+        self.gameover_frame = tk.Frame(self.canvas, background="blue", width=200, height=200)
+        self.gameover_label = tk.Label(self.canvas, text="Game Over", fg="white", bg="blue")
 
     def select_level(self):
+        """ Generate the menu of level selection """
         for widget in root.winfo_children():
             widget.grid_forget()
             widget.pack_forget()
-        self.var = tk.IntVar()
-        self.select_title = tk.Label(self.master, text="Select Level")
+            widget.place_forget()
         self.select_title.grid(row=0, column=1)
-        self.selection_label = tk.Label(self.master, text="")
         self.selection_label.grid(row=2, column=1)
-
-        self.level1_image = ImageTk.PhotoImage(Image.open("assets/level1_preview.png"))
-        self.level1_button = tk.Radiobutton(self.master, variable=self.var, value=1, indicatoron=0,
-                                            image=self.level1_image, command=self.update_selection)
         self.level1_button.grid(row=1, column=0)
-        self.level2_image = ImageTk.PhotoImage(Image.open("assets/level2_preview.png"))
-        self.level2_button = tk.Radiobutton(self.master, variable=self.var, value=2, indicatoron=0,
-                                            image=self.level2_image, command=self.update_selection)
         self.level2_button.grid(row=1, column=1)
-        self.level3_image = ImageTk.PhotoImage(Image.open("assets/level3_preview.png"))
-        self.level3_button = tk.Radiobutton(self.master, variable=self.var, value=3, indicatoron=0,
-                                            image=self.level3_image, command=self.update_selection)
         self.level3_button.grid(row=1, column=2)
-        self.start_game_button = tk.Button(self.master, text="Start Game", command=self.start_game)
         self.start_game_button.grid(row=3, column=1)
+
     def update_selection(self):
-        self.selection = self.var.get()
+        """ Update the selection label to indicate the level chosen """
+        self.selection = self.var.get()  # The value of the level chosen
         if self.selection == 1:
             self.selection_label.config(text="You have selected Level 1")
         elif self.selection == 2:
@@ -51,45 +84,64 @@ class MainApplication:
         elif self.selection == 3:
             self.selection_label.config(text="You have selected Level 3")
 
-    def start_game(self):
+    def initialize_game(self):
+        """ Create the game window and assets """
+        # Clear widgets from level selection menu
         for widget in root.winfo_children():
             widget.grid_forget()
-        self.canvas = tk.Canvas(self.master, width=800, height=800)
+            widget.place_forget()
+
+        for widget in self.canvas.winfo_children():
+            widget.grid_forget()
+            widget.place_forget()
+
+        # Pack the canvas to place the TurtleScreen on
         self.canvas.pack(fill="both", expand=True)
+
+        # Set the background depending on the level selected and update it to become visible
         if self.selection == 1:
-            self.canvas.create_image(0, 0, image=self.level_backgrounds[0], anchor="nw")
+            self.canvas.create_image(0, 0, image=self.level1_background, anchor="nw")
             self.screen = turtle.TurtleScreen(self.canvas)
             self.screen.bgpic('assets/level1_background.png')
             self.screen.update()
+
         if self.selection == 2:
-            self.canvas.create_image(0, 0, image=self.level_backgrounds[1], anchor="nw")
+            self.canvas.create_image(0, 0, image=self.level2_background, anchor="nw")
             self.screen = turtle.TurtleScreen(self.canvas)
             self.screen.bgpic('assets/level2_background.png')
+
         elif self.selection == 3:
-            self.canvas.create_image(0, 0, image=self.level_backgrounds[2], anchor="nw")
+            self.canvas.create_image(0, 0, image=self.level3_background, anchor="nw")
             self.screen = turtle.TurtleScreen(self.canvas)
             self.screen.bgpic('assets/level3_background.png')
             self.screen.update()
+
+        # Generate the scoreboard, paddle, ball and bricks
         self.scoreboard = ScoreBoard(screen=self.screen)
         self.game_paddle = Paddle(selection=self.selection, screen=self.screen)
         self.game_ball = Ball(selection=self.selection, screen=self.screen)
-        self.brick_color_initialization()
+
+        self.brick_color_initialization()  # Register all the brick images before creating the bricks
         self.game_bricks = Bricks(selection=self.selection, screen=self.screen)
-        self.screen.listen()
-        self.start_frame = tk.Frame(self.canvas, background="blue", width=200, height=200)
+
+        # Start "popup" to instruct the player to press space in order to start playing
         self.start_frame.place(x=300, y=400)
-        self.start_text = tk.Label(self.canvas, text="Press space to start", fg="white", bg="blue")
         self.start_text.place(x=300, y=450)
-        self.screen.onkey(self.game_start, "space")
+
+        # Screen starts listening for any key presses
+        self.screen.listen()
+        self.screen.onkey(self.game_start, "space")  # Game starts when space is pressed
 
     def brick_color_initialization(self):
+        """ Register all brick images so they can be used """
         for index in range(1, 9):
             self.screen.register_shape(fr"assets/brick_{index}.gif")
 
     def game_win(self):
-        self.win_frame = tk.Frame(self.canvas, background="blue", width=200, height=200)
+        """ Generate the win "popup" to indicate player's win and give option to go to main menu or
+        quit the application """
+        # Place the widgets needed
         self.win_frame.place(x=300, y=400)
-        self.win_label = tk.Label(self.canvas, text="You Won!", fg="white", bg="blue")
         self.win_label.place(x=350, y=450)
         self.menu_button = tk.Button(self.canvas, text="Main Menu", command=self.select_level)
         self.menu_button.place(x=325, y=500)
@@ -97,9 +149,10 @@ class MainApplication:
         self.quit_button.place(x=425, y=500)
 
     def game_over(self):
-        self.gameover_frame = tk.Frame(self.canvas, background="blue", width=200, height=200)
+        """ Generate the gameover "popup" to indicate player's loss and give option to go to main menu or
+        quit the application """
+        # Place the widgets needed
         self.gameover_frame.place(x=300, y=400)
-        self.gameover_label = tk.Label(self.canvas, text="Game Over", fg="white", bg="blue")
         self.gameover_label.place(x=350, y=450)
         self.menu_button = tk.Button(self.canvas, text="Main Menu", command=self.select_level)
         self.menu_button.place(x=325, y=500)
@@ -107,26 +160,41 @@ class MainApplication:
         self.quit_button.place(x=425, y=500)
 
     def game_start(self):
+        """ Start the game and its logic when player presses space """
+        # Remove the start "popup"
         self.start_text.place_forget()
         self.start_frame.place_forget()
+
+        # Set the game logic
         game_playing = True
         while game_playing:
             time.sleep(1 / 60)
+            # Listen for paddle left movement
             self.screen.onkey(self.game_paddle.left, "Left")
+            # Listen for paddle right movement
             self.screen.onkey(self.game_paddle.right, "Right")
+
+            # Activate ball movement and check its collisions
             self.game_ball.move()
             self.game_ball.collision_with_walls()
             self.game_ball.collision_with_paddle(self.game_paddle, scoreboard=self.scoreboard)
             self.game_ball.collision_with_bricks(bricks=self.game_bricks, scoreboard=self.scoreboard)
+
+            # Check if lives == 0, if so gameover
             if self.scoreboard.lives == 0:
                 game_playing = False
                 self.game_over()
+
+            # Check if there are any bricks left, otherwise game is won
             if not self.game_bricks.bricks:
                 game_playing = False
                 self.game_win()
 
+
 if __name__ == "__main__":
+    # Create the tkinter window
     root = tk.Tk()
     root.config(width=800, height=800)
+    # Create an instance of the MainApplication class and start the main event loop
     mainapplication = MainApplication(root)
     root.mainloop()
