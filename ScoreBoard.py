@@ -12,7 +12,7 @@ class ScoreBoard:
         # Game is initialized with 0 in score and 5 in lives
         self.score = 0
         self.lives = 5
-        self.scoreboard.goto(-300, 330)
+        self.scoreboard.goto(-350, 330)
         self.scoreboard.write(f'Score: {self.score}  Lives: {self.lives}', font=('Lexend', 15, 'normal'))
 
     def update_scoreboard(self):
