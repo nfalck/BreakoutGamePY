@@ -12,7 +12,7 @@ class ScoreBoard:
         self.scoreboard.hideturtle()
         self.scoreboard.color('white')
         self.score = 0
-        self.lives = 3
+        self.lives = 5
         self.scoreboard.goto(-300, 330)
         self.scoreboard.write(f'Score: {self.score}  Lives: {self.lives}', font=('Lexend', 15, 'normal'))
 
@@ -284,11 +284,25 @@ class MainApplication:
         self.brick_color_initialization()
         self.game_bricks = Bricks(selection=self.selection, screen=self.screen)
         self.screen.listen()
+        self.start_frame = tk.Frame(self.canvas, background="blue", width=200, height=200)
+        self.start_frame.place(x=300, y=400)
+        self.start_text = tk.Label(self.canvas, text="Press space to start", fg="white", bg="blue")
+        self.start_text.place(x=300, y=450)
         self.screen.onkey(self.game_start, "space")
 
     def brick_color_initialization(self):
         for index in range(1, 9):
             self.screen.register_shape(fr"assets/brick_{index}.gif")
+
+    def game_win(self):
+        self.win_frame = tk.Frame(self.canvas, background="blue", width=200, height=200)
+        self.win_frame.place(x=300, y=400)
+        self.win_label = tk.Label(self.canvas, text="You Won!", fg="white", bg="blue")
+        self.win_label.place(x=350, y=450)
+        self.menu_button = tk.Button(self.canvas, text="Main Menu", command=self.select_level)
+        self.menu_button.place(x=325, y=500)
+        self.quit_button = tk.Button(self.canvas, text="Quit", command=self.master.destroy)
+        self.quit_button.place(x=425, y=500)
 
     def game_over(self):
         self.gameover_frame = tk.Frame(self.canvas, background="blue", width=200, height=200)
@@ -301,6 +315,8 @@ class MainApplication:
         self.quit_button.place(x=425, y=500)
 
     def game_start(self):
+        self.start_text.place_forget()
+        self.start_frame.place_forget()
         game_playing = True
         while game_playing:
             time.sleep(1 / 60)
@@ -313,6 +329,9 @@ class MainApplication:
             if self.scoreboard.lives == 0:
                 game_playing = False
                 self.game_over()
+            if not self.game_bricks.bricks:
+                game_playing = False
+                self.game_win()
 
 if __name__ == "__main__":
     root = tk.Tk()
