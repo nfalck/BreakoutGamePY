@@ -3,6 +3,7 @@ import tkinter as tk
 from PIL import Image, ImageTk
 import random
 import time
+from functools import partial
 
 class ScoreBoard:
     def __init__(self, screen):
@@ -212,57 +213,7 @@ class Game:
     def __init__(self, master, selection, level_backgrounds):
         self.selection = selection
         self.master = master
-        self.canvas = tk.Canvas(self.master, width=800, height=800)
-        self.canvas.pack(fill="both", expand=True)
-        if self.selection == 1:
-            self.canvas.create_image(0, 0, image=level_backgrounds[0], anchor="nw")
-            self.screen = turtle.TurtleScreen(self.canvas)
-            self.screen.bgpic('assets/level1_background.png')
-            self.screen.update()
-        if self.selection == 2:
-            self.canvas.create_image(0, 0, image=level_backgrounds[1], anchor="nw")
-            self.screen = turtle.TurtleScreen(self.canvas)
-            self.screen.bgpic('assets/level2_background.png')
-        elif self.selection == 3:
-            self.canvas.create_image(0, 0, image=level_backgrounds[2], anchor="nw")
-            self.screen = turtle.TurtleScreen(self.canvas)
-            self.screen.bgpic('assets/level3_background.png')
-            self.screen.update()
-        self.scoreboard = ScoreBoard(screen=self.screen)
-        self.game_paddle = Paddle(selection=self.selection, screen=self.screen)
-        self.game_ball = Ball(selection=self.selection, screen=self.screen)
-        self.brick_color_initialization()
-        self.game_bricks = Bricks(selection=self.selection, screen=self.screen)
-        self.screen.listen()
-        self.screen.onkey(self.game_start, "space")
 
-    def brick_color_initialization(self):
-        for index in range(1,9):
-            self.screen.register_shape(fr"assets/brick_{index}.gif")
-
-    def game_over(self):
-        self.gameover_frame = tk.Frame(self.canvas, background="blue", width=200, height=200)
-        self.gameover_frame.place(x=300, y=400)
-        self.gameover_label = tk.Label(self.canvas, text="Game Over", fg="white", bg="blue")
-        self.gameover_label.place(x=350, y=450)
-        self.restart_button = tk.Button(self.canvas, text="Restart")
-        self.restart_button.place(x=325, y=500)
-        self.quit_button = tk.Button(self.canvas, text="Quit")
-        self.quit_button.place(x=425, y=500)
-
-    def game_start(self):
-        game_playing = True
-        while game_playing:
-            time.sleep(1 / 60)
-            self.screen.onkey(self.game_paddle.left, "Left")
-            self.screen.onkey(self.game_paddle.right, "Right")
-            self.game_ball.move()
-            self.game_ball.collision_with_walls()
-            self.game_ball.collision_with_paddle(self.game_paddle, scoreboard = self.scoreboard)
-            self.game_ball.collision_with_bricks(bricks=self.game_bricks, scoreboard=self.scoreboard)
-            if self.scoreboard.lives == 0:
-                game_playing = False
-                self.game_over()
 
 class MainApplication:
     def __init__(self, master):
@@ -278,6 +229,7 @@ class MainApplication:
     def select_level(self):
         for widget in root.winfo_children():
             widget.grid_forget()
+            widget.pack_forget()
         self.var = tk.IntVar()
         self.select_title = tk.Label(self.master, text="Select Level")
         self.select_title.grid(row=0, column=1)
@@ -310,8 +262,57 @@ class MainApplication:
     def start_game(self):
         for widget in root.winfo_children():
             widget.grid_forget()
-        game = Game(master=root, selection=self.var.get(), level_backgrounds=self.level_backgrounds)
+        self.canvas = tk.Canvas(self.master, width=800, height=800)
+        self.canvas.pack(fill="both", expand=True)
+        if self.selection == 1:
+            self.canvas.create_image(0, 0, image=self.level_backgrounds[0], anchor="nw")
+            self.screen = turtle.TurtleScreen(self.canvas)
+            self.screen.bgpic('assets/level1_background.png')
+            self.screen.update()
+        if self.selection == 2:
+            self.canvas.create_image(0, 0, image=self.level_backgrounds[1], anchor="nw")
+            self.screen = turtle.TurtleScreen(self.canvas)
+            self.screen.bgpic('assets/level2_background.png')
+        elif self.selection == 3:
+            self.canvas.create_image(0, 0, image=self.level_backgrounds[2], anchor="nw")
+            self.screen = turtle.TurtleScreen(self.canvas)
+            self.screen.bgpic('assets/level3_background.png')
+            self.screen.update()
+        self.scoreboard = ScoreBoard(screen=self.screen)
+        self.game_paddle = Paddle(selection=self.selection, screen=self.screen)
+        self.game_ball = Ball(selection=self.selection, screen=self.screen)
+        self.brick_color_initialization()
+        self.game_bricks = Bricks(selection=self.selection, screen=self.screen)
+        self.screen.listen()
+        self.screen.onkey(self.game_start, "space")
 
+    def brick_color_initialization(self):
+        for index in range(1, 9):
+            self.screen.register_shape(fr"assets/brick_{index}.gif")
+
+    def game_over(self):
+        self.gameover_frame = tk.Frame(self.canvas, background="blue", width=200, height=200)
+        self.gameover_frame.place(x=300, y=400)
+        self.gameover_label = tk.Label(self.canvas, text="Game Over", fg="white", bg="blue")
+        self.gameover_label.place(x=350, y=450)
+        self.menu_button = tk.Button(self.canvas, text="Main Menu", command=self.select_level)
+        self.menu_button.place(x=325, y=500)
+        self.quit_button = tk.Button(self.canvas, text="Quit", command=self.master.destroy)
+        self.quit_button.place(x=425, y=500)
+
+    def game_start(self):
+        game_playing = True
+        while game_playing:
+            time.sleep(1 / 60)
+            self.screen.onkey(self.game_paddle.left, "Left")
+            self.screen.onkey(self.game_paddle.right, "Right")
+            self.game_ball.move()
+            self.game_ball.collision_with_walls()
+            self.game_ball.collision_with_paddle(self.game_paddle, scoreboard=self.scoreboard)
+            self.game_ball.collision_with_bricks(bricks=self.game_bricks, scoreboard=self.scoreboard)
+            if self.scoreboard.lives == 0:
+                game_playing = False
+                self.game_over()
 
 if __name__ == "__main__":
     root = tk.Tk()
