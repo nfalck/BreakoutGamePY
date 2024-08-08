@@ -1,6 +1,6 @@
 import turtle
 import tkinter as tk
-import customtkinter as ctk
+import customtkinter as ctk  # To make the buttons visible for Mac as well
 from PIL import Image, ImageTk
 import time
 from ScoreBoard import ScoreBoard
