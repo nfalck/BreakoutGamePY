@@ -4,6 +4,8 @@
 
 A recreation of breakout game with python, using turtle, tkinter and pillow together. This is done in an OOP approach. It's a game where the player controls the paddle to hit a ball to destroy bricks, without letting the ball fall below the paddle. 
 
+<p align="center"> <img src="assets/demo.png" alt="Breakout Game Demo" width="300"/> </p>
+
 ## Features
 
 - Paddle, ball and bricks for a simple Breakout Game
